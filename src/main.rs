@@ -10,7 +10,41 @@ pub enum EingabeFehler {
 }
 
 fn wandle_eingabe(eingabe: &str) -> Result<u8, EingabeFehler> {
-    todo!()
+    //todo!()
+
+    // whitespaces und steuerzeichen und zeilenumbruch entfernen
+    let getrimmt = eingabe.trim();
+
+    // prüfen obs leer ist
+    if getrimmt.is_empty() {
+        return Err(EingabeFehler::Leer);
+    }
+
+    // prüfen ob zahl negativ
+    // wird hier an dieser stelle direkt über das vorzeichen ermittelt
+    // weil u8 später erst garnicht geparst wird wenn negativ und somit könnte der
+    // spezifische error auf negativ auch nicht mehr geworfen werden
+    // andere möglichkeit wäre
+    //          -> erst in typ wandeln der negativ sein kann
+    //          -> dann prüfen ob kleiner 0 und fehler werfen
+    //          -> danach erst zu u8 wandeln
+    if getrimmt.starts_with('-') {
+        return Err(EingabeFehler::NegativerWertNichtErlaubt);
+    }
+
+    // in u8 wandeln
+    let zahl = match getrimmt.parse::<u8>() {
+        Ok(z) => {
+            if z == 0 {
+                return Err(EingabeFehler::KeineGueltigeZahl);
+            } else {
+                z
+            }
+        }
+        Err(_) => return Err(EingabeFehler::KeineGueltigeZahl),
+    };
+
+    Ok(zahl)
 }
 
 //########################################################################
