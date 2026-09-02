@@ -128,4 +128,23 @@ mod tests {
         // sollte abbrechen, da min grösser max als ungültig betrachtet
         zufallszahl(4, 2);
     }
+
+    #[test]
+    fn test_untere_und_obere_grenze_ist_vorhanden_2_bis_8() {
+        let mut unterer_wert = 5;
+        let mut oberer_wert = 5;
+        for _ in 0..55 {
+            let z = zufallszahl(2, 8);
+            if z <= unterer_wert {
+                unterer_wert = z;
+            } else if z >= oberer_wert {
+                oberer_wert = z;
+            }
+            if unterer_wert == 2 && oberer_wert == 8 {
+                break;
+            }
+        }
+        assert_eq!(unterer_wert, 2, "Untere Grenze wurde nicht erreicht");
+        assert_eq!(oberer_wert, 8, "Obere Grenze wurde nicht erreicht");
+    }
 }
