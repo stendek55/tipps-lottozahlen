@@ -47,6 +47,10 @@ fn wandle_eingabe(eingabe: &str) -> Result<u8, EingabeFehler> {
     Ok(zahl)
 }
 
+fn zufallszahl(min: u8, max: u8) -> u8 {
+    todo!()
+}
+
 //########################################################################
 //###################-----HAUPTfunktion-----##############################
 //########################################################################
@@ -98,5 +102,30 @@ mod tests {
             wandle_eingabe("-55"),
             Err(EingabeFehler::NegativerWertNichtErlaubt)
         )
+    }
+
+    //#########################################################################
+    // tests für die zufallsfunktionen
+    // verzicht auf tests, welche negative bereiche/grenzen/ergebnisse prüfen -> da nicht benötigt
+    #[test]
+    fn test_bereich_klein_von_1_bis_6() {
+        // da ja schlecht zufällig genau ein wert getestet werden kann ;)
+        // werden hundert zufälle generiert die alle in einem kleinen bereich liegen müssen
+        for _ in 0..100 {
+            let z = zufallszahl(1, 6);
+            assert!(z >= 1 && z <= 6, "Wert {z} liegt außerhalb von 1..=6");
+        }
+    }
+    #[test]
+    fn test_wenn_min_gleich_max_dann_wert_gleich_grenzen_5() {
+        assert_eq!(zufallszahl(5, 5), 5, "Wert liegt außerhalb der grenzen 5")
+    }
+    #[test]
+    #[should_panic(expected = "Achtung -> Parameter MIN ist größer als MAX!")]
+    // der test wird bestanden wenn mit panic abgebrochen wird
+    // WICHTIG -> expected sollte gesetzt werden, da sonst jeder panic den test bestehen lässt
+    fn test_min_groesser_als_max_muss_panikken() {
+        // sollte abbrechen, da min grösser max als ungültig betrachtet
+        zufallszahl(4, 2);
     }
 }
