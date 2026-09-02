@@ -1,3 +1,4 @@
+use rand::RngExt;
 //########################################################################
 //######################----eigene FEHLERenums-----#######################
 //########################################################################
@@ -48,7 +49,11 @@ fn wandle_eingabe(eingabe: &str) -> Result<u8, EingabeFehler> {
 }
 
 fn zufallszahl(min: u8, max: u8) -> u8 {
-    todo!()
+    if min > max {
+        panic!("Achtung -> Parameter MIN ist größer als MAX!");
+    }
+
+    rand::rng().random_range(min..max + 1)
 }
 
 //########################################################################
