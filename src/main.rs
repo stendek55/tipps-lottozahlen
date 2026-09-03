@@ -166,20 +166,29 @@ mod tests {
 
     #[test]
     fn test_untere_und_obere_grenze_ist_vorhanden_2_bis_8() {
-        let mut unterer_wert = 5;
-        let mut oberer_wert = 5;
+        let mut unterer_wert_z = u8::MAX;
+        let mut oberer_wert_z = u8::MIN;
+        let mut unterer_wert_z0 = u8::MAX;
+        let mut oberer_wert_z0 = u8::MIN;
         for _ in 0..55 {
             let z = zufallszahl(2, 8);
-            if z <= unterer_wert {
-                unterer_wert = z;
-            } else if z >= oberer_wert {
-                oberer_wert = z;
-            }
-            if unterer_wert == 2 && oberer_wert == 8 {
+            let z0 = zufallszahl0(2, 8);
+            unterer_wert_z = std::cmp::min(unterer_wert_z, z);
+            oberer_wert_z = std::cmp::max(oberer_wert_z, z);
+            unterer_wert_z0 = std::cmp::min(unterer_wert_z0, z0);
+            oberer_wert_z0 = std::cmp::max(oberer_wert_z0, z0);
+
+            if unterer_wert_z == 2
+                && oberer_wert_z == 8
+                && unterer_wert_z0 == 2
+                && oberer_wert_z0 == 8
+            {
                 break;
             }
         }
-        assert_eq!(unterer_wert, 2, "Untere Grenze wurde nicht erreicht");
-        assert_eq!(oberer_wert, 8, "Obere Grenze wurde nicht erreicht");
+        assert_eq!(unterer_wert_z, 2, "Untere Grenze wurde nicht erreicht");
+        assert_eq!(oberer_wert_z, 8, "Obere Grenze wurde nicht erreicht");
+        assert_eq!(unterer_wert_z0, 2, "Untere Grenze wurde nicht erreicht");
+        assert_eq!(oberer_wert_z0, 8, "Obere Grenze wurde nicht erreicht");
     }
 }
