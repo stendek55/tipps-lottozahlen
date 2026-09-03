@@ -10,6 +10,9 @@ pub enum EingabeFehler {
     NegativerWertNichtErlaubt,
 }
 
+//########################################################################
+//###################-----eigeneFUNKTIONEN-----###########################
+//########################################################################
 fn wandle_eingabe(eingabe: &str) -> Result<u8, EingabeFehler> {
     //todo!()
 
@@ -48,6 +51,25 @@ fn wandle_eingabe(eingabe: &str) -> Result<u8, EingabeFehler> {
     Ok(zahl)
 }
 
+fn zufallszahl0(min: u8, max: u8) -> u8 {
+    if min > max {
+        panic!("Achtung -> Parameter MIN ist größer als MAX!");
+    }
+
+    // rand::random()
+    // -> generiert eine zufallszahl aus dem kompletten wertebereich des typs
+    // bool -> [true, false]
+    // f64  -> [0.0,  1.0]
+    // u8   -> [0,    255]
+    // let foo = loop ... break gibt wert an foo heraus
+    loop {
+        let zuff: u8 = rand::random();
+        if zuff >= min && zuff <= max {
+            break zuff;
+        }
+    }
+}
+
 fn zufallszahl(min: u8, max: u8) -> u8 {
     if min > max {
         panic!("Achtung -> Parameter MIN ist größer als MAX!");
@@ -64,6 +86,9 @@ fn main() {
     println!("hier wird mir RUST die nächsten korrekten lottozahlen zufällig generieren");
     println!("💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵");
     println!("💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰");
+
+    let zz = zufallszahl0(10, 20);
+    println!("zufallszahl----->{}", zz)
 }
 
 //#########################################################################
@@ -118,12 +143,16 @@ mod tests {
         // werden hundert zufälle generiert die alle in einem kleinen bereich liegen müssen
         for _ in 0..100 {
             let z = zufallszahl(1, 6);
-            assert!(z >= 1 && z <= 6, "Wert {z} liegt außerhalb von 1..=6");
+            let z0 = zufallszahl0(1, 6);
+            //assert!(z >= 1 && z <= 6, "Wert {z} liegt außerhalb von 1..=6");
+            assert!((1..=6).contains(&z), "Wert {z} liegt außerhalb von 1..=6");
+            assert!((1..=6).contains(&z0), "Wert {z0} liegt außerhalb von 1..=6");
         }
     }
     #[test]
     fn test_wenn_min_gleich_max_dann_wert_gleich_grenzen_5() {
-        assert_eq!(zufallszahl(5, 5), 5, "Wert liegt außerhalb der grenzen 5")
+        assert_eq!(zufallszahl(5, 5), 5, "Wert liegt außerhalb der grenzen 5");
+        assert_eq!(zufallszahl0(5, 5), 5, "Wert liegt außerhalb der grenzen 5");
     }
     #[test]
     #[should_panic(expected = "Achtung -> Parameter MIN ist größer als MAX!")]
@@ -132,6 +161,7 @@ mod tests {
     fn test_min_groesser_als_max_muss_panikken() {
         // sollte abbrechen, da min grösser max als ungültig betrachtet
         zufallszahl(4, 2);
+        zufallszahl0(4, 2);
     }
 
     #[test]
