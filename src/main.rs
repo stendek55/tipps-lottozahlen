@@ -51,10 +51,14 @@ fn wandle_eingabe(eingabe: &str) -> Result<u8, EingabeFehler> {
     Ok(zahl)
 }
 
-fn zufallszahl0(min: u8, max: u8) -> u8 {
+fn pruefe_grenzen_min_max_vertauscht(min: u8, max: u8) {
     if min > max {
         panic!("Achtung -> Parameter MIN ist größer als MAX!");
     }
+}
+
+fn zufallszahl0(min: u8, max: u8) -> u8 {
+    pruefe_grenzen_min_max_vertauscht(min, max);
 
     // rand::random()
     // -> generiert eine zufallszahl aus dem kompletten wertebereich des typs
@@ -71,9 +75,7 @@ fn zufallszahl0(min: u8, max: u8) -> u8 {
 }
 
 fn zufallszahl(min: u8, max: u8) -> u8 {
-    if min > max {
-        panic!("Achtung -> Parameter MIN ist größer als MAX!");
-    }
+    pruefe_grenzen_min_max_vertauscht(min, max);
 
     rand::rng().random_range(min..max + 1)
 }
