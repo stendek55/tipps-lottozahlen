@@ -5,6 +5,7 @@
 
 use rand::RngExt;
 use rand::distr::{Distribution, Uniform};
+use rand::prelude::IndexedRandom;
 //########################################################################
 //######################----eigene FEHLERenums-----#######################
 //########################################################################
@@ -20,8 +21,6 @@ pub enum EingabeFehler {
 //###################-----eigeneFUNKTIONEN-----###########################
 //########################################################################
 fn wandle_eingabe(eingabe: &str) -> Result<u8, EingabeFehler> {
-    //todo!()
-
     // whitespaces und steuerzeichen und zeilenumbruch entfernen
     let getrimmt = eingabe.trim();
 
@@ -150,6 +149,34 @@ fn zufallszahl_durch_gleichverteilung(min: u8, max: u8) -> u8 {
     verteilung.sample(&mut rng)
 }
 
+/// generiert eine zufallszahl, indem zuerst ein array mit allen zahlen von `min`
+/// bis inklusive `max` befüllt und daraus ein zufälliges element ausgewählt wird.
+///
+/// # beispiele
+///
+/// ```
+/// let zahl = zufallszahl_durch_array_auswahl(1, 5);
+/// assert!((1..=5).contains(&zahl));
+/// ```
+///
+/// # panics
+///
+/// bricht ab, wenn der parameter `min` größer als `max` ist.
+fn zufallszahl_durch_array_auswahl(min: u8, max: u8) -> u8 {
+    pruefe_grenzen_min_max_vertauscht(min, max);
+
+    // vektor wird mit dem bereich von min bis inklusive max befüllt
+    let zahlen_liste: Vec<u8> = (min..=max).collect();
+
+    // der zufallsgenerator wird geholt
+    let mut rng = rand::rng();
+
+    // .choose() wählt eine zufällige referenz aus dem slice aus
+    // unwrap ist sicher, da die liste durch den vorherigen test niemals leer ist
+    // das führende sternchen * kopiert den u8-wert aus der referenz heraus
+    *zahlen_liste.choose(&mut rng).unwrap()
+}
+
 //########################################################################
 //###################-----HAUPTfunktion-----##############################
 //########################################################################
@@ -262,9 +289,10 @@ mod tests {
     }
     // hier werden tests vollautomatisch auf verschieden varianten angewendet
     generiere_tests_fuer_zufallszahlen_funktionen!(variante_standard, zufallszahl_durch_standard);
-    generiere_tests_fuer_zufallszahlen_funktionen!(variante_null, zufallszahl_durch_ablehnung);
+    generiere_tests_fuer_zufallszahlen_funktionen!(variante_ablehnung, zufallszahl_durch_ablehnung);
     generiere_tests_fuer_zufallszahlen_funktionen!(
-        variante_eins,
+        variante_gleich,
         zufallszahl_durch_gleichverteilung
     );
+    generiere_tests_fuer_zufallszahlen_funktionen!(variante_array, zufallszahl_durch_array_auswahl);
 }
