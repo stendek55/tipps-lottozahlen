@@ -4,8 +4,10 @@
 //! gleichverteilung) zu testen, zu vergleichen und per tdd abzusichern.
 
 use rand::RngExt;
+use rand::SeedableRng;
 use rand::distr::{Distribution, Uniform};
 use rand::prelude::IndexedRandom;
+use rand::rngs::StdRng;
 //########################################################################
 //######################----eigene FEHLERenums-----#######################
 //########################################################################
@@ -177,6 +179,34 @@ fn zufallszahl_durch_array_auswahl(min: u8, max: u8) -> u8 {
     *zahlen_liste.choose(&mut rng).unwrap()
 }
 
+/// generiert eine kryptografisch hochsichere zufallszahl durch direkte abfrage
+/// der systementropie des betriebssystems.
+///
+/// dieses verfahren holt echte entropie direkt aus dem betriebssystem-kernel
+/// und initialisiert den krypto-generator jedes mal frisch.
+///
+/// # beispiele
+///
+/// ```
+/// let geheimnis = zufallszahl_durch_systementropie(1, 100);
+/// assert!((1..=100).contains(&geheimnis));
+/// ```
+///
+/// # panics
+///
+/// bricht ab, wenn der parameter `min` größer als `max` ist.
+fn zufallszahl_durch_systementropie(min: u8, max: u8) -> u8 {
+    pruefe_grenzen_min_max_vertauscht(min, max);
+
+    // erzeugt einen frischen krypto-generator, der direkt über die
+    // ungepufferte system-entropie (sysrng) befüttert und gestartet wird
+    let mut rng = StdRng::try_from_rng(&mut getrandom::SysRng).unwrap();
+
+    let verteilung = Uniform::new(min, max + 1).unwrap();
+
+    // sample zieht die zahl direkt aus der krypto-quelle.
+    verteilung.sample(&mut rng)
+}
 //########################################################################
 //###################-----HAUPTfunktion-----##############################
 //########################################################################
@@ -295,4 +325,8 @@ mod tests {
         zufallszahl_durch_gleichverteilung
     );
     generiere_tests_fuer_zufallszahlen_funktionen!(variante_array, zufallszahl_durch_array_auswahl);
+    generiere_tests_fuer_zufallszahlen_funktionen!(
+        variante_sicher,
+        zufallszahl_durch_systementropie
+    );
 }
