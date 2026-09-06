@@ -1,4 +1,5 @@
 use rand::RngExt;
+use rand::distr::{Distribution, Uniform};
 //########################################################################
 //######################----eigene FEHLERenums-----#######################
 //########################################################################
@@ -80,6 +81,23 @@ fn zufallszahl(min: u8, max: u8) -> u8 {
     rand::rng().random_range(min..max + 1)
 }
 
+// nutzt eine variante wobei im gewahlten bereich sicher gleiche chancen bestehen
+// ausserdem schnell
+fn zufallszahl_1(min: u8, max: u8) -> u8 {
+    pruefe_grenzen_min_max_vertauscht(min, max);
+    // rng holt den zufallsgenerator für den aktuellen thread
+    // mut ist nötig, weil der generator seinen zustand beim würfeln ändert
+    let mut rng = rand::rng();
+
+    // uniform::new baut die mathematische verteilung auf
+    // unwrap entpackt den wert, da new ab v0.9 ein result zurückgibt
+    let verteilung = Uniform::new(min, max + 1).unwrap();
+
+    // sample zieht die zufallszahl mithilfe des generators
+    // &mut übergibt rng als veränderbare referenz für den nächsten zustand.
+    verteilung.sample(&mut rng)
+}
+
 //########################################################################
 //###################-----HAUPTfunktion-----##############################
 //########################################################################
@@ -89,7 +107,7 @@ fn main() {
     println!("💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵");
     println!("💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰");
 
-    let zz = zufallszahl0(10, 20);
+    let zz = zufallszahl_1(10, 20);
     println!("zufallszahl----->{}", zz)
 }
 
@@ -193,4 +211,5 @@ mod tests {
     // hier werden tests vollautomatisch auf verschieden varianten angewendet
     generiere_tests_fuer_zufallszahlen_funktionen!(variante_standard, zufallszahl);
     generiere_tests_fuer_zufallszahlen_funktionen!(variante_null, zufallszahl0);
+    generiere_tests_fuer_zufallszahlen_funktionen!(variante_eins, zufallszahl_1);
 }
