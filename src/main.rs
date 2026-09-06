@@ -1,3 +1,8 @@
+//! dieses modul stellt verschiedene algorithmen zur generierung von zufallszahlen bereit.
+//!
+//! es dient als plattform, um unterschiedliche herangehensweisen (ablehnung, standardbereich,
+//! gleichverteilung) zu testen, zu vergleichen und per tdd abzusichern.
+
 use rand::RngExt;
 use rand::distr::{Distribution, Uniform};
 //########################################################################
@@ -51,14 +56,33 @@ fn wandle_eingabe(eingabe: &str) -> Result<u8, EingabeFehler> {
 
     Ok(zahl)
 }
-
+/// prüft, ob die untere grenze größer als die obere grenze ist.
+///
+/// # panics
+///
+/// die funktion bricht kontrolliert ab (panic), wenn `min` größer als `max` ist.
 fn pruefe_grenzen_min_max_vertauscht(min: u8, max: u8) {
     if min > max {
         panic!("Achtung -> Parameter MIN ist größer als MAX!");
     }
 }
 
-fn zufallszahl0(min: u8, max: u8) -> u8 {
+/// generiert eine zufallszahl durch wiederholtes würfeln des gesamten u8-bereichs.
+///
+/// das ablehnungsverfahren (rejection sampling) wiederholt den vorgang so lange,
+/// bis eine generierte zahl innerhalb der gewünschten grenzen liegt.
+///
+/// # beispiele
+///
+/// ```
+/// let zahl = zufallszahl_durch_ablehnung(1, 6);
+/// assert!((1..=6).contains(&zahl));
+/// ```
+///
+/// # panics
+///
+/// bricht ab, wenn der parameter `min` größer als `max` ist.
+fn zufallszahl_durch_ablehnung(min: u8, max: u8) -> u8 {
     pruefe_grenzen_min_max_vertauscht(min, max);
 
     // rand::random()
@@ -75,15 +99,43 @@ fn zufallszahl0(min: u8, max: u8) -> u8 {
     }
 }
 
-fn zufallszahl(min: u8, max: u8) -> u8 {
+/// generiert eine zufallszahl über die standard-bereichsmethode von rand.
+///
+/// diese methode nutzt die standard-implementierung der rand-bibliothek,
+/// um einen wert im übergebenen bereich zu erzeugen.
+///
+/// # beispiele
+///
+/// ```
+/// let zahl = zufallszahl_durch_standardbereich(10, 20);
+/// assert!((10..=20).contains(&zahl));
+/// ```
+///
+/// # panics
+///
+/// bricht ab, wenn der parameter `min` größer als `max` ist.
+fn zufallszahl_durch_standard(min: u8, max: u8) -> u8 {
     pruefe_grenzen_min_max_vertauscht(min, max);
 
     rand::rng().random_range(min..max + 1)
 }
 
-// nutzt eine variante wobei im gewahlten bereich sicher gleiche chancen bestehen
-// ausserdem schnell
-fn zufallszahl_1(min: u8, max: u8) -> u8 {
+/// generiert eine zufallszahl über eine explizit erstellte gleichverteilung.
+///
+/// nutzt das `uniform`-konstrukt für gleichbleibende chancen aller werte
+/// im gewählten bereich.
+///
+/// # beispiele
+///
+/// ```
+/// let zahl = zufallszahl_durch_gleichverteilung(5, 5);
+/// assert_eq!(zahl, 5);
+/// ```
+///
+/// # panics
+///
+/// bricht ab, wenn der parameter `min` größer als `max` ist.
+fn zufallszahl_durch_gleichverteilung(min: u8, max: u8) -> u8 {
     pruefe_grenzen_min_max_vertauscht(min, max);
     // rng holt den zufallsgenerator für den aktuellen thread
     // mut ist nötig, weil der generator seinen zustand beim würfeln ändert
@@ -107,7 +159,7 @@ fn main() {
     println!("💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵");
     println!("💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰");
 
-    let zz = zufallszahl_1(10, 20);
+    let zz = zufallszahl_durch_gleichverteilung(10, 20);
     println!("zufallszahl----->{}", zz)
 }
 
@@ -209,7 +261,10 @@ mod tests {
         };
     }
     // hier werden tests vollautomatisch auf verschieden varianten angewendet
-    generiere_tests_fuer_zufallszahlen_funktionen!(variante_standard, zufallszahl);
-    generiere_tests_fuer_zufallszahlen_funktionen!(variante_null, zufallszahl0);
-    generiere_tests_fuer_zufallszahlen_funktionen!(variante_eins, zufallszahl_1);
+    generiere_tests_fuer_zufallszahlen_funktionen!(variante_standard, zufallszahl_durch_standard);
+    generiere_tests_fuer_zufallszahlen_funktionen!(variante_null, zufallszahl_durch_ablehnung);
+    generiere_tests_fuer_zufallszahlen_funktionen!(
+        variante_eins,
+        zufallszahl_durch_gleichverteilung
+    );
 }
