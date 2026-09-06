@@ -139,58 +139,58 @@ mod tests {
     //#########################################################################
     // tests für die zufallsfunktionen
     // verzicht auf tests, welche negative bereiche/grenzen/ergebnisse prüfen -> da nicht benötigt
-    #[test]
-    fn test_bereich_klein_von_1_bis_6() {
-        // da ja schlecht zufällig genau ein wert getestet werden kann ;)
-        // werden hundert zufälle generiert die alle in einem kleinen bereich liegen müssen
-        for _ in 0..100 {
-            let z = zufallszahl(1, 6);
-            let z0 = zufallszahl0(1, 6);
-            //assert!(z >= 1 && z <= 6, "Wert {z} liegt außerhalb von 1..=6");
-            assert!((1..=6).contains(&z), "Wert {z} liegt außerhalb von 1..=6");
-            assert!((1..=6).contains(&z0), "Wert {z0} liegt außerhalb von 1..=6");
-        }
-    }
-    #[test]
-    fn test_wenn_min_gleich_max_dann_wert_gleich_grenzen_5() {
-        assert_eq!(zufallszahl(5, 5), 5, "Wert liegt außerhalb der grenzen 5");
-        assert_eq!(zufallszahl0(5, 5), 5, "Wert liegt außerhalb der grenzen 5");
-    }
-    #[test]
-    #[should_panic(expected = "Achtung -> Parameter MIN ist größer als MAX!")]
-    // der test wird bestanden wenn mit panic abgebrochen wird
-    // WICHTIG -> expected sollte gesetzt werden, da sonst jeder panic den test bestehen lässt
-    fn test_min_groesser_als_max_muss_panikken() {
-        // sollte abbrechen, da min grösser max als ungültig betrachtet
-        zufallszahl(4, 2);
-        zufallszahl0(4, 2);
-    }
+    // erstellen eines makros da verschiedene funktionen immer das selbe verhalten abbilden sollen
+    //      - bekommen immer gleiche Parameter
+    //      - liefern immer gleichen rückgabetyp
+    // makro verhindert da sreduntante aufrufen der tests
+    macro_rules! generiere_tests_fuer_zufallszahlen_funktionen {
+        ($mod_name:ident, $funktion:expr) => {
+            mod $mod_name {
 
-    #[test]
-    fn test_untere_und_obere_grenze_ist_vorhanden_2_bis_8() {
-        let mut unterer_wert_z = u8::MAX;
-        let mut oberer_wert_z = u8::MIN;
-        let mut unterer_wert_z0 = u8::MAX;
-        let mut oberer_wert_z0 = u8::MIN;
-        for _ in 0..55 {
-            let z = zufallszahl(2, 8);
-            let z0 = zufallszahl0(2, 8);
-            unterer_wert_z = std::cmp::min(unterer_wert_z, z);
-            oberer_wert_z = std::cmp::max(oberer_wert_z, z);
-            unterer_wert_z0 = std::cmp::min(unterer_wert_z0, z0);
-            oberer_wert_z0 = std::cmp::max(oberer_wert_z0, z0);
+                use super::*;
+                #[test]
+                fn test_bereich_klein_von_1_bis_6() {
+                    // da ja schlecht zufällig genau ein wert getestet werden kann ;)
+                    // werden hundert zufälle generiert die alle in einem kleinen bereich liegen müssen
+                    for _ in 0..100 {
+                        let z = $funktion(1, 6);
+                        //assert!(z >= 1 && z <= 6, "Wert {z} liegt außerhalb von 1..=6");
+                        assert!((1..=6).contains(&z), "Wert {z} liegt außerhalb von 1..=6");
+                    }
+                }
+                #[test]
+                fn test_wenn_min_gleich_max_dann_wert_gleich_grenzen_5() {
+                    assert_eq!($funktion(5, 5), 5, "Wert liegt außerhalb der grenzen 5");
+                }
+                #[test]
+                #[should_panic(expected = "Achtung -> Parameter MIN ist größer als MAX!")]
+                // der test wird bestanden wenn mit panic abgebrochen wird
+                // WICHTIG -> expected sollte gesetzt werden, da sonst jeder panic den test bestehen lässt
+                fn test_min_groesser_als_max_muss_panikken() {
+                    // sollte abbrechen, da min grösser max als ungültig betrachtet
+                    $funktion(4, 2);
+                }
 
-            if unterer_wert_z == 2
-                && oberer_wert_z == 8
-                && unterer_wert_z0 == 2
-                && oberer_wert_z0 == 8
-            {
-                break;
+                #[test]
+                fn test_untere_und_obere_grenze_ist_vorhanden_2_bis_8() {
+                    let mut unterer_wert_z = u8::MAX;
+                    let mut oberer_wert_z = u8::MIN;
+                    for _ in 0..55 {
+                        let z = $funktion(2, 8);
+                        unterer_wert_z = std::cmp::min(unterer_wert_z, z);
+                        oberer_wert_z = std::cmp::max(oberer_wert_z, z);
+
+                        if unterer_wert_z == 2 && oberer_wert_z == 8 {
+                            break;
+                        }
+                    }
+                    assert_eq!(unterer_wert_z, 2, "Untere Grenze wurde nicht erreicht");
+                    assert_eq!(oberer_wert_z, 8, "Obere Grenze wurde nicht erreicht");
+                }
             }
-        }
-        assert_eq!(unterer_wert_z, 2, "Untere Grenze wurde nicht erreicht");
-        assert_eq!(oberer_wert_z, 8, "Obere Grenze wurde nicht erreicht");
-        assert_eq!(unterer_wert_z0, 2, "Untere Grenze wurde nicht erreicht");
-        assert_eq!(oberer_wert_z0, 8, "Obere Grenze wurde nicht erreicht");
+        };
     }
+    // hier werden tests vollautomatisch auf verschieden varianten angewendet
+    generiere_tests_fuer_zufallszahlen_funktionen!(variante_standard, zufallszahl);
+    generiere_tests_fuer_zufallszahlen_funktionen!(variante_null, zufallszahl0);
 }
