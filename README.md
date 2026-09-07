@@ -1,6 +1,6 @@
-# 🚧 tipps-lottozahlen
+# tipps-lottozahlen
 ---
-**Status: In Bearbeitung** 🛠️
+# **Status: In Bearbeitung**
 
 Dieses Projekt nimmt Werte vom User über die Konsole entgegen. Das primäre **Lernziel** ist das Erarbeiten und Verstehen der verschiedenen mathematischen und systemweiten Möglichkeiten, um **Zufallszahlen** zu generieren. 
 
@@ -8,7 +8,7 @@ Parallel dazu arbeite ich das offizielle Rust-Buch durch, um die Theorie direkt 
 
 ---
 
-### 🦀 Mein Lernprinzip: 100% Eigenarbeit 😊
+### Mein Lernprinzip:
 
 * **TDD (Test-Driven Development):** Das Projekt wird strikt testgetrieben entwickelt. Erst der Test, dann der Code.
 
