@@ -207,6 +207,59 @@ fn zufallszahl_durch_systementropie(min: u8, max: u8) -> u8 {
     // sample zieht die zahl direkt aus der krypto-quelle.
     verteilung.sample(&mut rng)
 }
+
+///funktion erstellt ein array vom benötigten zahlenbereich
+///dann wird eine der erstellten methoden zufällig ausgewählt
+///um einen zufallsindex zu liefern
+///ist etwas doppelt gemoppelt ;)
+/// Wählt zufällig einen von fünf Algorithmen, um eine Zufallszahl im Bereich `[min, max]` zu bestimmen.
+///
+/// # Panics
+///
+/// Panict, wenn `min > max` oder der ermittelte Index außerhalb des Array-Bereichs liegt.
+///
+/// # Beispiel
+///
+/// ```
+/// let zahl = zufall_durch_zufallsindex_array(1, 6);
+/// assert!((1..=6).contains(&zahl));
+/// ```
+/// #########################################################
+/// ########## spassfunktion-kein einsatz ###################
+/// ########## unnötig, teuer, übungszweck ##################
+/// #########################################################
+fn zufall_durch_zufallsindex_array(min: u8, max: u8) -> u8 {
+    pruefe_grenzen_min_max_vertauscht(min, max);
+    //benötigten zahlenbereich bereitstellen
+    let zahlen_liste = (min..=max).collect::<Vec<u8>>();
+
+    let mut ergebnis: u8 = 0;
+
+    // array mit funktionszeigern erstellen
+    // Rust leitet den typ automatisch ab
+    // [fn(u8, u8) -> u8; 5]
+    let zufaelle_funktionen = [
+        zufallszahl_durch_standard,
+        zufallszahl_durch_ablehnung,
+        zufallszahl_durch_gleichverteilung,
+        zufallszahl_durch_array_auswahl,
+        zufallszahl_durch_systementropie,
+    ];
+
+    //zufallsgenerator starten
+    let mut rng = rand::rng();
+
+    // zufällig eine funktion aus dem array auswählen
+    if let Some(zufaellige_fkt) = zufaelle_funktionen.choose(&mut rng) {
+        // der ausgewählten funktion die parameter übergeben und ergebnis erhalten
+        // nicht min und max sondern natürliche arrayindizes
+        ergebnis = zufaellige_fkt(0_u8, (zahlen_liste.len() - 1) as u8);
+    }
+
+    // element aus array zurückgeben -> index muss usize sein
+    zahlen_liste[ergebnis as usize]
+}
+
 //########################################################################
 //###################-----HAUPTfunktion-----##############################
 //########################################################################
@@ -217,7 +270,9 @@ fn main() {
     println!("💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰");
 
     let zz = zufallszahl_durch_gleichverteilung(10, 20);
-    println!("zufallszahl----->{}", zz)
+    println!("zufallszahl----->{}", zz);
+    let zzz = zufall_durch_zufallsindex_array(23, 42);
+    println!("zufallszahlFOO----->{}", zzz);
 }
 
 //#########################################################################
@@ -329,4 +384,5 @@ mod tests {
         variante_sicher,
         zufallszahl_durch_systementropie
     );
+    generiere_tests_fuer_zufallszahlen_funktionen!(variante_index, zufall_durch_zufallsindex_array);
 }
