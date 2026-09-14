@@ -260,6 +260,10 @@ fn zufall_durch_zufallsindex_array(min: u8, max: u8) -> u8 {
     zahlen_liste[ergebnis as usize]
 }
 
+fn erzeuge_zufallszahlen(_anzahl: u8) -> Vec<u8> {
+    unimplemented!();
+}
+
 //########################################################################
 //###################-----HAUPTfunktion-----##############################
 //########################################################################
@@ -269,10 +273,31 @@ fn main() {
     println!("💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵");
     println!("💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰");
 
+    //#####################################################################
+    //###########---- zum asuprobieren beim entwickeln ----################
+    //#####################################################################
     let zz = zufallszahl_durch_gleichverteilung(10, 20);
     println!("zufallszahl----->{}", zz);
     let zzz = zufall_durch_zufallsindex_array(23, 42);
     println!("zufallszahlFOO----->{}", zzz);
+
+    let zahlen_liste = [2, 5, 6, 13, 4, 1, 8];
+    println!("###############################");
+    println!("liste {zahlen_liste:?}");
+    let mut sortierte_foo = zahlen_liste.to_vec();
+    sortierte_foo.sort();
+    let sortierte_bar = zahlen_liste.to_vec().sort(); // compiliert , aber einzeiler führt so nicht zum erhofften ergebnis
+    println!("liste {zahlen_liste:?}"); // -> unsortiert
+    println!("liste {sortierte_foo:?}"); // -> korrekt sortiert 
+    println!("liste {sortierte_bar:?}"); // -> liefert () -> da sort in place operiert
+
+    let keine_doppelte = [4, 8, 9, 11];
+    let mit_doppelten = [4, 8, 8, 11];
+
+    let prueft_kd = keine_doppelte.windows(2).any(|r| r[0] == r[1]);
+    let prueft_md = mit_doppelten.windows(2).any(|r| r[0] == r[1]);
+    println!("ohne dopplungen {prueft_kd}");
+    println!("mit dopplungen {prueft_md}");
 }
 
 //#########################################################################
@@ -385,4 +410,32 @@ mod tests {
         zufallszahl_durch_systementropie
     );
     generiere_tests_fuer_zufallszahlen_funktionen!(variante_index, zufall_durch_zufallsindex_array);
+
+    #[test]
+    fn test_werden_geforderte_anzahl_von_zahlen_gegeben() {
+        let anzahl = 8;
+        let zahlen = erzeuge_zufallszahlen(anzahl);
+
+        assert_eq!(
+            zahlen.len(),
+            anzahl.into(),
+            "Es wurde nicht die geforderte Anzahl an Zahlen geliefert"
+        );
+    }
+
+    #[test]
+    fn test_keine_doppelten_zahlen_liefern() {
+        let anzahl = 6;
+        let zahlen = erzeuge_zufallszahlen(anzahl);
+        let mut sortiert = zahlen.clone();
+        sortiert.sort();
+
+        // windows(2) -> prüft jedes aufeinanderfolgende paar
+        // wichtiger hinweis -> any bricht bei erstem treffer ab
+        // also nicht versuchen auf ungleichheit zu prüfen
+        // und dann eine true-assert zu erwarten ;)
+        let sind_doppelte = sortiert.windows(2).any(|r| r[0] == r[1]);
+
+        assert!(!sind_doppelte, "Darin sind doppelte Werte {:?}", zahlen);
+    }
 }
