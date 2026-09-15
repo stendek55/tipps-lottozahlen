@@ -260,8 +260,41 @@ fn zufall_durch_zufallsindex_array(min: u8, max: u8) -> u8 {
     zahlen_liste[ergebnis as usize]
 }
 
-fn erzeuge_zufallszahlen(_anzahl: u8) -> Vec<u8> {
-    unimplemented!();
+//rückgabetyp wurdewurde umgebaut
+//TODO -> test muss daran angepasst werden
+fn erzeuge_zufallszahlen(anzahl: u8) -> Vec<Vec<u8>> {
+    //unimplemented!();
+    //grenzen für zahlenbereich LOTTO 6 aus 49
+    let start = 1_u8;
+    let ende = 49_u8;
+    let zahlen = 6;
+    //liste für neue ziehung
+    let mut gewinnzahlen = Vec::new();
+    //liste eigener zufallsfunktionen
+    let zufallsfunktionen = [
+        zufallszahl_durch_ablehnung,
+        zufallszahl_durch_standard,
+        zufallszahl_durch_gleichverteilung,
+        zufallszahl_durch_array_auswahl,
+        zufallszahl_durch_systementropie,
+    ];
+    //zufallsgenerator starten
+    let mut rng = rand::rng();
+
+    for _ in 0..anzahl {
+        let mut ziehung = Vec::new();
+
+        for _ in 0..zahlen {
+            let mut glueckszahl = 0;
+            if let Some(gewinn_funktion) = zufallsfunktionen.choose(&mut rng) {
+                glueckszahl = gewinn_funktion(start, ende);
+            }
+            ziehung.push(glueckszahl);
+        }
+        gewinnzahlen.push(ziehung);
+    }
+
+    gewinnzahlen
 }
 
 //########################################################################
@@ -298,6 +331,9 @@ fn main() {
     let prueft_md = mit_doppelten.windows(2).any(|r| r[0] == r[1]);
     println!("ohne dopplungen {prueft_kd}");
     println!("mit dopplungen {prueft_md}");
+
+    let volltreffer = erzeuge_zufallszahlen(5);
+    println!("die sinds!!!{volltreffer:?}");
 }
 
 //#########################################################################
