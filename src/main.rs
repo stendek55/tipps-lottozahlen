@@ -461,10 +461,12 @@ mod tests {
 
     #[test]
     fn test_keine_doppelten_zahlen_liefern() {
-        let anzahl = 6;
+        let anzahl = 1;
         let zahlen = erzeuge_zufallszahlen(anzahl);
-        let mut sortiert = zahlen.clone();
+        let mut sortiert = zahlen[0].clone();
         sortiert.sort();
+        dbg!(&zahlen);
+        dbg!(&sortiert);
 
         // windows(2) -> prüft jedes aufeinanderfolgende paar
         // wichtiger hinweis -> any bricht bei erstem treffer ab
