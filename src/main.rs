@@ -260,10 +260,7 @@ fn zufall_durch_zufallsindex_array(min: u8, max: u8) -> u8 {
     zahlen_liste[ergebnis as usize]
 }
 
-//rückgabetyp wurdewurde umgebaut
-//TODO -> test muss daran angepasst werden
 fn erzeuge_zufallszahlen(anzahl: u8) -> Vec<Vec<u8>> {
-    //unimplemented!();
     //grenzen für zahlenbereich LOTTO 6 aus 49
     let start = 1_u8;
     let ende = 49_u8;
@@ -281,15 +278,24 @@ fn erzeuge_zufallszahlen(anzahl: u8) -> Vec<Vec<u8>> {
     //zufallsgenerator starten
     let mut rng = rand::rng();
 
+    //durcjgänge für geforderte anzahl an ziehungen
     for _ in 0..anzahl {
         let mut ziehung = Vec::new();
 
+        //durchgänge für die sechs gewinnzahlen
         for _ in 0..zahlen {
-            let mut glueckszahl = 0;
+            //eine zufallfunktion zufällig auswählen
             if let Some(gewinn_funktion) = zufallsfunktionen.choose(&mut rng) {
-                glueckszahl = gewinn_funktion(start, ende);
+                //loop um dopplungen zu vermeiden
+                loop {
+                    let glueckszahl = gewinn_funktion(start, ende);
+                    //prüfen das die zahl noch nicht in der liste ist
+                    if !ziehung.contains(&glueckszahl) {
+                        ziehung.push(glueckszahl);
+                        break;
+                    }
+                }
             }
-            ziehung.push(glueckszahl);
         }
         gewinnzahlen.push(ziehung);
     }
