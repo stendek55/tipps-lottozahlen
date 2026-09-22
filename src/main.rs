@@ -311,6 +311,36 @@ fn main() {
     println!("hier wird mir RUST die nächsten korrekten lottozahlen zufällig generieren");
     println!("💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵💵");
     println!("💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰💰");
+    println!();
+    println!("bitte gebe deine gewünschte anzahl an ziehungen an: ");
+
+    let anzahl = loop {
+        let mut eingabe = String::new();
+        std::io::stdin().read_line(&mut eingabe).unwrap();
+
+        match wandle_eingabe(&eingabe) {
+            Ok(zahl) => {
+                break zahl;
+            }
+            Err(EingabeFehler::Leer) => {
+                println!("bitte gebe eine zahl ein!");
+            }
+            Err(EingabeFehler::NegativerWertNichtErlaubt) => {
+                println!("bitte gebe eine positive zahl ein!");
+            }
+            Err(EingabeFehler::KeineGueltigeZahl) => {
+                println!("bitte gebe eine gültige ganzzahl ein!");
+            }
+        }
+    };
+
+    let volltreffer = erzeuge_zufallszahlen(anzahl);
+    println!("--------> DEINE GLÜCKSZAHLEN <-----");
+    for ziehung in volltreffer.iter() {
+        println!();
+        println!("💵💵💰💰💰 {:?} 💵💵💵💵💰💰", ziehung);
+        println!();
+    }
 
     //#####################################################################
     //###########---- zum asuprobieren beim entwickeln ----################
