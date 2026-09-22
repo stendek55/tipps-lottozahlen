@@ -1,8 +1,11 @@
+//! # Lotto-Simulator 6 aus 49
 //! dieses modul stellt verschiedene algorithmen zur generierung von zufallszahlen bereit.
 //!
 //! es dient als plattform, um unterschiedliche herangehensweisen (ablehnung, standardbereich,
 //! gleichverteilung) zu testen, zu vergleichen und per tdd abzusichern.
-
+//! Es simuliert Lottotipps. Der Benutzer kann über die Konsole
+//! eingeben, wie viele Ziehungen generiert werden sollen. Die Ziehungen werden
+//! anschließend über verschiedene Zufallsalgorithmen berechnet.
 use rand::RngExt;
 use rand::SeedableRng;
 use rand::distr::{Distribution, Uniform};
@@ -22,6 +25,35 @@ pub enum EingabeFehler {
 //########################################################################
 //###################-----eigeneFUNKTIONEN-----###########################
 //########################################################################
+/// Validiert und konvertiert eine Benutzereingabe (Text) in eine Ganzzahl vom Typ `u8`.
+///
+/// Die Funktion entfernt führende sowie nachfolgende Leer- und Steuerzeichen und prüft
+/// die Eingabe auf spezifische Fehlerkriterien, bevor sie in eine Zahl umgewandelt wird.
+///
+/// # Parameter
+///
+/// * `eingabe` - Ein String-Slice (`&str`), der die rohe Eingabe des Benutzers enthält.
+///
+/// # Rückgabewert
+///
+/// * `Ok(u8)` - Die erfolgreich validierte und konvertierte Zahl (größer als 0).
+/// * `Err(EingabeFehler)` - Ein spezifischer Fehler, falls die Eingabe ungültig ist:
+///   * `EingabeFehler::Leer` - Wenn die Eingabe leer ist oder nur aus Leerzeichen bestand.
+///   * `EingabeFehler::NegativerWertNichtErlaubt` - Wenn die Eingabe mit einem `-` beginnt.
+///   * `EingabeFehler::KeineGueltigeZahl` - Wenn die Eingabe keine Zahl ist, den Wert `0` hat oder den Wertebereich von `u8` (255) überschreitet.
+///
+/// # Examples
+///
+/// ```
+/// // Gültige Konvertierung
+/// assert_eq!(wandle_eingabe(" 42 \n"), Ok(42));
+///
+/// // Fehlerfälle abfangen
+/// assert!(wandle_eingabe("").is_err());
+/// assert!(wandle_eingabe("-5").is_err());
+/// assert!(wandle_eingabe("0").is_err());
+/// assert!(wandle_eingabe("abc").is_err());
+/// ```
 fn wandle_eingabe(eingabe: &str) -> Result<u8, EingabeFehler> {
     // whitespaces und steuerzeichen und zeilenumbruch entfernen
     let getrimmt = eingabe.trim();
@@ -208,58 +240,37 @@ fn zufallszahl_durch_systementropie(min: u8, max: u8) -> u8 {
     verteilung.sample(&mut rng)
 }
 
-///funktion erstellt ein array vom benötigten zahlenbereich
-///dann wird eine der erstellten methoden zufällig ausgewählt
-///um einen zufallsindex zu liefern
-///ist etwas doppelt gemoppelt ;)
-/// Wählt zufällig einen von fünf Algorithmen, um eine Zufallszahl im Bereich `[min, max]` zu bestimmen.
+/// Erzeugt eine verschachtelte Liste von Lottoschein-Ziehungen (6 aus 49).
 ///
-/// # Panics
+/// Für jede Ziehung werden 6 eindeutige Zufallszahlen im Bereich von 1 bis 49 generiert.
+/// Die Zahlen werden dabei dynamisch und zufällig über verschiedene mathematische
+/// und systemnahe Zufallsalgorithmen ermittelt.
 ///
-/// Panict, wenn `min > max` oder der ermittelte Index außerhalb des Array-Bereichs liegt.
+/// # Parameter
 ///
-/// # Beispiel
+/// * `anzahl` - Die Anzahl der zu generierenden Tippscheine / Ziehungen (Spiele).
+///
+/// # Rückgabewert
+///
+/// Gibt einen Vektor von Vektoren (`Vec<Vec<u8>>`) zurück. Jede innere Liste repräsentiert
+/// eine Ziehung und enthält genau 6 eindeutige, ungeordnete Gewinnzahlen.
+///
+/// # Algorithmus und Besonderheiten
+///
+/// Die Funktion nutzt intern ein Array aus fünf verschiedenen Zufallsfunktionen. Für jede
+/// einzelne Gewinnzahl wird per Zufall entschieden, welcher Algorithmus (z. B. Ablehnung,
+/// Systementropie, Gleichverteilung) die Zahl generiert. Duplikate innerhalb einer Ziehung
+/// werden strikt gefiltert.
+///
+/// # Examples
 ///
 /// ```
-/// let zahl = zufall_durch_zufallsindex_array(1, 6);
-/// assert!((1..=6).contains(&zahl));
+/// let anzahl_tipps = 3;
+/// let lotto_tipps = erzeuge_zufallszahlen(anzahl_tipps);
+///
+/// assert_eq!(lotto_tipps.len(), 3);
+/// assert_eq!(lotto_tipps[0].len(), 6);
 /// ```
-/// #########################################################
-/// ########## spassfunktion-kein einsatz ###################
-/// ########## unnötig, teuer, übungszweck ##################
-/// #########################################################
-fn zufall_durch_zufallsindex_array(min: u8, max: u8) -> u8 {
-    pruefe_grenzen_min_max_vertauscht(min, max);
-    //benötigten zahlenbereich bereitstellen
-    let zahlen_liste = (min..=max).collect::<Vec<u8>>();
-
-    let mut ergebnis: u8 = 0;
-
-    // array mit funktionszeigern erstellen
-    // Rust leitet den typ automatisch ab
-    // [fn(u8, u8) -> u8; 5]
-    let zufaelle_funktionen = [
-        zufallszahl_durch_standard,
-        zufallszahl_durch_ablehnung,
-        zufallszahl_durch_gleichverteilung,
-        zufallszahl_durch_array_auswahl,
-        zufallszahl_durch_systementropie,
-    ];
-
-    //zufallsgenerator starten
-    let mut rng = rand::rng();
-
-    // zufällig eine funktion aus dem array auswählen
-    if let Some(zufaellige_fkt) = zufaelle_funktionen.choose(&mut rng) {
-        // der ausgewählten funktion die parameter übergeben und ergebnis erhalten
-        // nicht min und max sondern natürliche arrayindizes
-        ergebnis = zufaellige_fkt(0_u8, (zahlen_liste.len() - 1) as u8);
-    }
-
-    // element aus array zurückgeben -> index muss usize sein
-    zahlen_liste[ergebnis as usize]
-}
-
 fn erzeuge_zufallszahlen(anzahl: u8) -> Vec<Vec<u8>> {
     //grenzen für zahlenbereich LOTTO 6 aus 49
     let start = 1_u8;
@@ -341,35 +352,6 @@ fn main() {
         println!("💵💵💰💰💰 {:?} 💵💵💵💵💰💰", ziehung);
         println!();
     }
-
-    //#####################################################################
-    //###########---- zum asuprobieren beim entwickeln ----################
-    //#####################################################################
-    let zz = zufallszahl_durch_gleichverteilung(10, 20);
-    println!("zufallszahl----->{}", zz);
-    let zzz = zufall_durch_zufallsindex_array(23, 42);
-    println!("zufallszahlFOO----->{}", zzz);
-
-    let zahlen_liste = [2, 5, 6, 13, 4, 1, 8];
-    println!("###############################");
-    println!("liste {zahlen_liste:?}");
-    let mut sortierte_foo = zahlen_liste.to_vec();
-    sortierte_foo.sort();
-    let sortierte_bar = zahlen_liste.to_vec().sort(); // compiliert , aber einzeiler führt so nicht zum erhofften ergebnis
-    println!("liste {zahlen_liste:?}"); // -> unsortiert
-    println!("liste {sortierte_foo:?}"); // -> korrekt sortiert 
-    println!("liste {sortierte_bar:?}"); // -> liefert () -> da sort in place operiert
-
-    let keine_doppelte = [4, 8, 9, 11];
-    let mit_doppelten = [4, 8, 8, 11];
-
-    let prueft_kd = keine_doppelte.windows(2).any(|r| r[0] == r[1]);
-    let prueft_md = mit_doppelten.windows(2).any(|r| r[0] == r[1]);
-    println!("ohne dopplungen {prueft_kd}");
-    println!("mit dopplungen {prueft_md}");
-
-    let volltreffer = erzeuge_zufallszahlen(5);
-    println!("die sinds!!!{volltreffer:?}");
 }
 
 //#########################################################################
@@ -481,7 +463,6 @@ mod tests {
         variante_sicher,
         zufallszahl_durch_systementropie
     );
-    generiere_tests_fuer_zufallszahlen_funktionen!(variante_index, zufall_durch_zufallsindex_array);
 
     #[test]
     fn test_werden_geforderte_anzahl_von_zahlen_gegeben() {
